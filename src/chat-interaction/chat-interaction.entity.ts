@@ -13,6 +13,6 @@ export class ChatInteraction {
   @ManyToOne(() => Chat)
   chat: Chat;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'timestamptz' })
   lastInteraction?: Date;
 }

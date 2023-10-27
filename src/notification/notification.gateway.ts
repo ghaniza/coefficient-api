@@ -11,7 +11,6 @@ import { Server, Socket } from 'socket.io';
 import { LoggerService } from '../logger/logger.service';
 import { UserService } from '../user/user.service';
 import { AuthService } from '../auth/auth.service';
-import * as cookie from 'cookie';
 
 @WebSocketGateway({
   transports: ['polling', 'websocket'],
@@ -37,19 +36,51 @@ export class NotificationGateway
     client.emit('pong', 'response ' + data);
   }
 
-  public async handleConnection(client: Socket) {
-    if (!client.request.headers.cookie) return false;
+  public async emitChatUpdateNotification(
+    chatId: string,
+    userIds: string[],
+    fromId: string,
+  ) {
+    for (const userId of userIds) {
+      this.server
+        .to(`notification-${userId}`)
+        .emit('chat-update', { chatId, fromId });
+    }
+  }
 
+  public async emitChatAckNotification(
+    chatId: string,
+    userIds: string[],
+    fromId: string,
+  ) {
+    for (const userId of userIds) {
+      this.server
+        .to(`notification-${userId}`)
+        .emit('chat-ack', { chatId, fromId });
+    }
+  }
+
+  public async handleConnection(client: Socket) {
+    const { authorization } = client.request.headers;
+
+    const payload = await this.authService.validateCredentials(
+      authorization.substring(7),
+    );
+    await this.userService.setUserStatus(payload.sub, true);
     this.logger.debug('Connected: ' + client.id, 'Notification');
-    const { uid } = cookie.parse(client.request.headers.cookie);
-    await this.userService.setUserStatus(uid, false);
+    await client.join(`notification-${payload.sub}`);
+    this.server.emit('user-connected', { userId: payload.sub });
   }
 
   public async handleDisconnect(client: Socket) {
-    if (!client.request.headers.cookie) return false;
+    const { authorization } = client.request.headers;
+    if (!authorization) return false;
 
+    const payload = await this.authService.validateCredentials(
+      authorization.substring(7),
+    );
+    await this.userService.setUserStatus(payload.sub, false);
     this.logger.debug('Disconnect: ' + client.id, 'Notification');
-    const { uid } = cookie.parse(client.request.headers.cookie);
-    await this.userService.setUserStatus(uid, false);
+    this.server.emit('user-disconnected', { userId: payload.sub });
   }
 }

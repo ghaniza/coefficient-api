@@ -18,6 +18,15 @@ export class MessageController {
   constructor(private readonly messageService: MessageService) {}
 
   @UseGuards(AuthGuard)
+  @Post(':chatId/ack')
+  private async registerAck(
+    @Param('chatId', ParseUUIDPipe) chatId: string,
+    @Req() request: Request,
+  ) {
+    return this.messageService.registerAck(chatId, (request as any).user.sub);
+  }
+
+  @UseGuards(AuthGuard)
   @Post(':chatId')
   private async registerMessage(
     @Param('chatId', ParseUUIDPipe) chatId: string,

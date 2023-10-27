@@ -33,4 +33,12 @@ export class ChatInteractionService {
       { lastInteraction: new Date() },
     );
   }
+
+  public async getChatParticipants(chatId: string) {
+    const chatInteractions = await this.chatInteractionRepository.find({
+      where: { chat: { id: chatId } },
+      relations: ['user'],
+    });
+    return chatInteractions.map((chat) => chat.user);
+  }
 }

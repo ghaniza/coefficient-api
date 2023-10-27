@@ -28,7 +28,8 @@ export class ChatRepository extends Repository<Chat> {
                jsonb_agg(u.*) AS "participants",
                c2.count       AS "unreadMessageCount",
                (SELECT jsonb_build_object(
-                               'id', m.id, 'timestamp', m.timestamp, 'content', m.content, 'fromId', m."fromId"
+                               'id', m.id, 'timestamp', m.timestamp::timestamp WITH TIME ZONE, 'content', m.content,
+                               'fromId', m."fromId"
                            )
                 FROM message m
                 WHERE m."chatId" = "c"."id"

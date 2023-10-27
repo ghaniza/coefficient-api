@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { MessageRepository } from './message.repository';
 import { MessageGateway } from './message.gateway';
 import { ChatInteractionService } from '../chat-interaction/chat-interaction.service';
+import { NotificationGateway } from '../notification/notification.gateway';
 
 @Injectable()
 export class MessageService {
   constructor(
     private readonly messageRepository: MessageRepository,
     private readonly messageGateway: MessageGateway,
+    private readonly notificationGateway: NotificationGateway,
     private readonly chatInteractionService: ChatInteractionService,
   ) {}
 
@@ -28,8 +30,14 @@ export class MessageService {
       where: { id: saved.id },
       relations: ['from', 'chat'],
     });
+    const users = await this.chatInteractionService.getChatParticipants(chatId);
 
     await this.messageGateway.emitMessage(chatId, response);
+    await this.notificationGateway.emitChatUpdateNotification(
+      chatId,
+      users.map((user) => user.id),
+      fromId,
+    );
     await this.chatInteractionService.updateInteraction(chatId, fromId);
 
     return response;
@@ -47,5 +55,16 @@ export class MessageService {
       },
       relations: ['from'],
     });
+  }
+
+  public async registerAck(chatId: string, userId: string) {
+    await this.chatInteractionService.updateInteraction(chatId, userId);
+    const users = await this.chatInteractionService.getChatParticipants(chatId);
+    await this.notificationGateway.emitChatAckNotification(
+      chatId,
+      users.map((user) => user.id),
+      userId,
+    );
+    return { status: 'ok' };
   }
 }

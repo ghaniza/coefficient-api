@@ -10,6 +10,8 @@ import {
 import { Server, Socket } from 'socket.io';
 import { LoggerService } from '../logger/logger.service';
 import { Message } from './message.entity';
+import { AuthService } from '../auth/auth.service';
+import { ChatInteractionService } from '../chat-interaction/chat-interaction.service';
 
 @WebSocketGateway({
   transports: ['polling', 'websocket'],
@@ -21,7 +23,11 @@ export class MessageGateway
   @WebSocketServer()
   server: Server;
 
-  constructor(private readonly logger: LoggerService) {}
+  constructor(
+    private readonly logger: LoggerService,
+    private readonly authService: AuthService,
+    private readonly chatInteractionService: ChatInteractionService,
+  ) {}
 
   @SubscribeMessage('ping')
   private async handleEvent(
@@ -30,6 +36,22 @@ export class MessageGateway
   ): Promise<void> {
     this.logger.debug('ping');
     client.emit('pong', 'response ' + data);
+  }
+
+  @SubscribeMessage('ack')
+  private async handleAck(
+    @ConnectedSocket() client: Socket,
+    @MessageBody('chatId') chatId: string,
+  ) {
+    const { authorization } = client.request.headers;
+    if (!authorization) return false;
+
+    const payload = await this.authService.validateCredentials(
+      authorization.substring(7),
+    );
+
+    this.logger.debug('Ack ' + chatId, 'Message');
+    await this.chatInteractionService.updateInteraction(chatId, payload.sub);
   }
 
   @SubscribeMessage('join-chat')
