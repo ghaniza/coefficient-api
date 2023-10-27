@@ -20,6 +20,7 @@ export class UserService {
         'sha256',
       )
       .toString('base64');
+    user.passwordLastChangedAt = new Date();
 
     return this.userRepository.save(user);
   }

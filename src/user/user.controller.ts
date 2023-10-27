@@ -28,7 +28,7 @@ export class UserController {
     return this.userService.getUserById(userId);
   }
 
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Post()
   private async createUser(@Body() createUserParamsDTO: CreateUserParamsDTO) {
     return this.userService.createUser(createUserParamsDTO);
