@@ -16,11 +16,21 @@ export class ChatInteractionService {
         this.chatInteractionRepository.create({
           chat: { id: chatId },
           user: { id: userId },
-          lastInteraction: new Date(),
+          lastInteraction: new Date(new Date().toISOString()),
         }),
       );
     }
 
     return await this.chatInteractionRepository.save(entities);
+  }
+
+  public async updateInteraction(chatId: string, userId: string) {
+    await this.chatInteractionRepository.update(
+      {
+        chat: { id: chatId },
+        user: { id: userId },
+      },
+      { lastInteraction: new Date(new Date().toISOString()) },
+    );
   }
 }

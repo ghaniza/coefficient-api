@@ -22,8 +22,17 @@ export class User {
   @Column({ default: false })
   online: boolean;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'timestamptz' })
   lastOnline: Date;
+
+  @Column({ select: false })
+  unique: string;
+
+  @Column({ select: false })
+  password: string;
+
+  @Column()
+  passwordLastChangedAt: Date;
 
   @CreateDateColumn()
   createdAt: Date;

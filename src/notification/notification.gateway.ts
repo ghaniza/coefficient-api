@@ -9,6 +9,9 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { LoggerService } from '../logger/logger.service';
+import { UserService } from '../user/user.service';
+import { AuthService } from '../auth/auth.service';
+import * as cookie from 'cookie';
 
 @WebSocketGateway({
   transports: ['polling', 'websocket'],
@@ -20,7 +23,11 @@ export class NotificationGateway
   @WebSocketServer()
   server: Server;
 
-  constructor(private readonly logger: LoggerService) {}
+  constructor(
+    private readonly logger: LoggerService,
+    private readonly userService: UserService,
+    private readonly authService: AuthService,
+  ) {}
 
   @SubscribeMessage('ping')
   private async handleEvent(
@@ -30,11 +37,19 @@ export class NotificationGateway
     client.emit('pong', 'response ' + data);
   }
 
-  public handleConnection(client: Socket): any {
+  public async handleConnection(client: Socket) {
+    if (!client.request.headers.cookie) return false;
+
     this.logger.debug('Connected: ' + client.id, 'Notification');
+    const { uid } = cookie.parse(client.request.headers.cookie);
+    await this.userService.setUserStatus(uid, false);
   }
 
-  public handleDisconnect(client: Socket): any {
+  public async handleDisconnect(client: Socket) {
+    if (!client.request.headers.cookie) return false;
+
     this.logger.debug('Disconnect: ' + client.id, 'Notification');
+    const { uid } = cookie.parse(client.request.headers.cookie);
+    await this.userService.setUserStatus(uid, false);
   }
 }

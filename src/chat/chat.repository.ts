@@ -11,29 +11,45 @@ export class ChatRepository extends Repository<Chat> {
   }
 
   public async getChatData(
-    olderThan: Date = new Date(),
+    userId: string,
+    unreadOnly = false,
   ): Promise<ChatDataDTO[]> {
     const query = `
-        SELECT jsonb_agg(u.*) AS            "participants",
+        WITH cids AS (SELECT ci."chatId" AS id, ci."lastInteraction"
+                      FROM chat_interaction ci
+                      WHERE ci."userId" = $1),
+             countids AS (SELECT count(distinct m.id)::int AS count, m."chatId" AS "chatId"
+                          FROM message m
+                                   INNER JOIN cids ON m."chatId" = cids.id
+                          WHERE m."fromId" <> $1
+                            AND m.timestamp >= cids."lastInteraction"
+                          GROUP BY m."chatId")
+        SELECT c.id,
+               jsonb_agg(u.*) AS "participants",
+               c2.count       AS "unreadMessageCount",
                (SELECT jsonb_build_object(
-                               'id', m.id,
-                               'timestamp', m.timestamp,
-                               'content', m.content,
-                               'fromId', m."fromId"
+                               'id', m.id, 'timestamp', m.timestamp, 'content', m.content, 'fromId', m."fromId"
                            )
                 FROM message m
                 WHERE m."chatId" = "c"."id"
                 GROUP BY m."id", m."timestamp"
-                ORDER BY m."timestamp" DESC LIMIT 1) AS "lastMessage",
-               (SELECT COUNT(DISTINCT id) FROM "message" WHERE "timestamp" <= $1)::int AS "unreadMessageCount"
+                ORDER BY m."timestamp" DESC
+                LIMIT 1)      AS "lastMessage"
         FROM chat c
-            LEFT JOIN chat_interaction ci
-        ON ci."chatId" = c.id
-            LEFT JOIN "user" u ON ci."userId" = u.id
-            INNER JOIN "message" m2 ON m2."chatId" = c."id"
-        GROUP BY c.id;
+                 INNER JOIN public.chat_interaction i on c.id = i."chatId"
+                 INNER JOIN cids ON cids.id = c.id
+                 LEFT JOIN public."user" u on u.id = i."userId"
+                 LEFT JOIN countids c2 ON c2."chatId" = c.id
+        WHERE (CASE
+                   WHEN $2 THEN
+                       c2.count > 0
+                   ELSE TRUE
+            END)
+        GROUP BY c.id, c2.count
+        ORDER BY c."updatedAt" DESC
+        LIMIT 10;
     `;
 
-    return this.query(query, [olderThan]);
+    return this.query(query, [userId, unreadOnly]);
   }
 }
