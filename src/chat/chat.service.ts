@@ -39,7 +39,7 @@ export class ChatService {
     return chat;
   }
 
-  public async getChatData() {
-    return this.chatRepository.getChatData();
+  public async getChatData(userId: string, unreadOnly?: boolean) {
+    return this.chatRepository.getChatData(userId, unreadOnly);
   }
 }

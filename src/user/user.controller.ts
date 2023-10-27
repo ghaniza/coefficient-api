@@ -6,12 +6,22 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateUserParamsDTO } from './user.dto';
+import { Request } from 'express';
+import { AuthGuard } from '../auth/auth.guard';
 
 @Controller({ path: 'user', version: '1' })
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @UseGuards(AuthGuard)
+  @Get()
+  private async getViewer(@Req() request: Request) {
+    return this.userService.getUserById((request as any).user.sub);
+  }
 
   @Get(':userId')
   private async getUserById(@Param('userId', ParseUUIDPipe) userId: string) {

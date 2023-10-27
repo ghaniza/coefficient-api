@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -11,6 +11,8 @@ import { FileModule } from './file/file.module';
 import { AudioClipModule } from './audio-clip/audio-clip.module';
 import { ChatModule } from './chat/chat.module';
 import { ChatInteractionModule } from './chat-interaction/chat-interaction.module';
+import { AuthModule } from './auth/auth.module';
+import { LoggerMiddleware } from './logger/logger.middleware';
 
 @Module({
   imports: [
@@ -32,8 +34,13 @@ import { ChatInteractionModule } from './chat-interaction/chat-interaction.modul
     AudioClipModule,
     ChatModule,
     ChatInteractionModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}
