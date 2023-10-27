@@ -3,8 +3,6 @@ import { UserRepository } from './user.repository';
 import { CreateUserParamsDTO } from './user.dto';
 import * as crypto from 'crypto';
 
-console.log(new Date().getTimezoneOffset());
-
 @Injectable()
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}

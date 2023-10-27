@@ -13,6 +13,7 @@ import { ConfigService } from '@nestjs/config';
         secret: configService.getOrThrow('ACCESS_SECRET'),
         signOptions: { expiresIn: '8h' },
       }),
+      global: true,
       inject: [ConfigService],
     }),
     UserModule,
