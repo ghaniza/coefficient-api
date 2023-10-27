@@ -21,6 +21,7 @@ import { LoggerMiddleware } from './logger/logger.middleware';
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         url: configService.get('DATABASE_URL'),
+        ssl: configService.get('NODE_ENV') === 'production',
         autoLoadEntities: true,
         synchronize: true,
       }),
