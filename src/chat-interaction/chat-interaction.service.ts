@@ -16,7 +16,7 @@ export class ChatInteractionService {
         this.chatInteractionRepository.create({
           chat: { id: chatId },
           user: { id: userId },
-          lastInteraction: new Date(new Date().toISOString()),
+          lastInteraction: new Date(),
         }),
       );
     }
@@ -30,7 +30,7 @@ export class ChatInteractionService {
         chat: { id: chatId },
         user: { id: userId },
       },
-      { lastInteraction: new Date(new Date().toISOString()) },
+      { lastInteraction: new Date() },
     );
   }
 }

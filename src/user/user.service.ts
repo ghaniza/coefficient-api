@@ -20,7 +20,6 @@ export class UserService {
         'sha256',
       )
       .toString('base64');
-    user.passwordLastChangedAt = new Date(new Date().toISOString());
 
     return this.userRepository.save(user);
   }
@@ -49,7 +48,7 @@ export class UserService {
 
     user.online = online;
 
-    if (online) user.lastOnline = new Date(new Date().toISOString());
+    if (online) user.lastOnline = new Date();
 
     return this.userRepository.save(user);
   }
