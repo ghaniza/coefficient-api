@@ -61,8 +61,11 @@ export class MessageGateway
   ): Promise<void> {
     const roomId = `chat-${chatId}`;
 
-    if (Array.from(client.rooms.values()).find((room) => room === roomId))
-      return;
+    for (const room of Array.from(client.rooms.values())) {
+      if (room.startsWith('chat-')) {
+        await client.leave(room);
+      }
+    }
 
     await client.join(roomId);
     this.logger.debug(`Joined "${roomId}"`);

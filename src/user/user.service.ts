@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserRepository } from './user.repository';
 import { CreateUserParamsDTO } from './user.dto';
 import * as crypto from 'crypto';
+import { ILike, Not } from 'typeorm';
 
 @Injectable()
 export class UserService {
@@ -52,5 +53,22 @@ export class UserService {
     if (online) user.lastOnline = new Date();
 
     return this.userRepository.save(user);
+  }
+
+  public async findUsers(query: string, userId: string, cursor = 0, limit = 8) {
+    return this.userRepository.find({
+      where: [
+        {
+          id: Not(userId),
+          name: ILike(`%${query}%`.trim().replaceAll(' ', '%')),
+        },
+        {
+          id: Not(userId),
+          email: ILike(`%${query}%`.trim().replaceAll(' ', '%')),
+        },
+      ],
+      skip: cursor,
+      take: limit,
+    });
   }
 }

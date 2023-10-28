@@ -12,6 +12,7 @@ import {
 import { ChatService } from './chat.service';
 import { CreateChatParamsDTO } from './chat.dto';
 import { AuthGuard } from '../auth/auth.guard';
+import { UserId } from '../decorators/user.decorator';
 
 @Controller({ path: 'chat', version: '1' })
 export class ChatController {
@@ -31,8 +32,12 @@ export class ChatController {
     return this.chatService.getChatData(request.user.sub, unread === 'true');
   }
 
+  @UseGuards(AuthGuard)
   @Post()
-  private async createChat(@Body() createChatParamsDTO: CreateChatParamsDTO) {
-    return this.chatService.createChat(createChatParamsDTO);
+  private async createChat(
+    @Body() createChatParamsDTO: CreateChatParamsDTO,
+    @UserId() userId: string,
+  ) {
+    return this.chatService.createChat(createChatParamsDTO, userId);
   }
 }

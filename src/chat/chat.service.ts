@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ChatRepository } from './chat.repository';
 import { CreateChatParamsDTO } from './chat.dto';
 import { ChatInteractionService } from '../chat-interaction/chat-interaction.service';
@@ -10,11 +14,17 @@ export class ChatService {
     private readonly chatInteractionService: ChatInteractionService,
   ) {}
 
-  public async createChat(createChatParamsDTO: CreateChatParamsDTO) {
+  public async createChat(
+    createChatParamsDTO: CreateChatParamsDTO,
+    userId: string,
+  ) {
+    if (createChatParamsDTO.userIds.includes(userId))
+      throw new BadRequestException();
+
     const chat = await this.chatRepository.save(this.chatRepository.create());
     const participants =
       await this.chatInteractionService.createChatInteractions(
-        createChatParamsDTO.userIds,
+        [...createChatParamsDTO.userIds, userId],
         chat.id,
       );
 
