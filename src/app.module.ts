@@ -13,6 +13,8 @@ import { ChatModule } from './chat/chat.module';
 import { ChatInteractionModule } from './chat-interaction/chat-interaction.module';
 import { AuthModule } from './auth/auth.module';
 import { LoggerMiddleware } from './logger/logger.middleware';
+import { EmailModule } from './email/email.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -27,6 +29,12 @@ import { LoggerMiddleware } from './logger/logger.middleware';
       }),
       inject: [ConfigService],
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 10,
+      },
+    ]),
     LoggerModule,
     UserModule,
     NotificationModule,
@@ -36,6 +44,7 @@ import { LoggerMiddleware } from './logger/logger.middleware';
     ChatModule,
     ChatInteractionModule,
     AuthModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

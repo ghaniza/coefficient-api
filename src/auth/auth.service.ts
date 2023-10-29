@@ -1,19 +1,39 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import * as crypto from 'crypto';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class AuthService {
   constructor(
+    @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly emailService: EmailService,
+    private readonly configService: ConfigService,
   ) {}
 
   private hash(plain: string, salt: string) {
     return crypto
       .pbkdf2Sync(plain, salt, 100_000, 64, 'sha256')
       .toString('base64');
+  }
+
+  public async makeUserAuthentication(password: string) {
+    const unique = crypto.randomBytes(32).toString('base64');
+    const hash = this.hash(password, unique);
+
+    return {
+      unique,
+      password: hash,
+    };
   }
 
   public async signIn(username: string, password: string, scopes: string[]) {
@@ -59,11 +79,48 @@ export class AuthService {
     };
   }
 
+  public async resetPasswordAuthorization(email: string, expiresIn = '15m') {
+    return this.jwtService.signAsync(
+      {
+        aud: 'RESET_PW',
+      },
+      {
+        subject: email,
+        expiresIn,
+      },
+    );
+  }
+
   public async signOff(userId: string) {
     await this.userService.setUserStatus(userId, false);
   }
 
   public async validateCredentials(authorization: string) {
     return this.jwtService.verify(authorization);
+  }
+
+  public createAuthorizationCode() {
+    const salt = this.configService.get('SIGNATURE_SECRET');
+    const id = Date.now().toString();
+    const sig = this.hash(id, salt);
+
+    return Buffer.from(`${id}.${sig}`).toString('base64url');
+  }
+
+  public validateAuthorizationCode(code: string) {
+    const salt = this.configService.get('SIGNATURE_SECRET');
+    const authExpirationMs = this.configService.get('AUTH_CODE_EXP');
+
+    const [id, sig] = Buffer.from(code, 'base64url').toString().split('.');
+    const checkSig = this.hash(id, salt);
+
+    if (parseInt(id) + parseInt(authExpirationMs) < Date.now()) return false;
+
+    return sig === checkSig;
+  }
+
+  public async sendAuthorizationCode() {
+    const code = this.createAuthorizationCode();
+    await this.emailService.sendAuthorizationCode(code);
   }
 }

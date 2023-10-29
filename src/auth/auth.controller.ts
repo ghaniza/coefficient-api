@@ -1,7 +1,16 @@
-import { Body, Controller, Post, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
 import { Request, Response } from 'express';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller({ path: 'auth', version: '1' })
 export class AuthController {
@@ -26,6 +35,13 @@ export class AuthController {
       sameSite: 'none',
     });
     response.json(payload);
+  }
+
+  @Throttle({ default: { limit: 1, ttl: 60_000 } })
+  @HttpCode(204)
+  @Post('authorization-code')
+  private async sendAuthorizationCode() {
+    return this.authService.sendAuthorizationCode();
   }
 
   @UseGuards(AuthGuard)
