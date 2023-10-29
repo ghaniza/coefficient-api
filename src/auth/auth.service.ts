@@ -20,9 +20,9 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  private hash(plain: string, salt: string) {
+  private hash(plain: string, salt: string, length = 64) {
     return crypto
-      .pbkdf2Sync(plain, salt, 100_000, 64, 'sha256')
+      .pbkdf2Sync(plain, salt, 100_000, length, 'sha256')
       .toString('base64');
   }
 
@@ -102,7 +102,7 @@ export class AuthService {
   public createAuthorizationCode() {
     const salt = this.configService.get('SIGNATURE_SECRET');
     const id = Date.now().toString();
-    const sig = this.hash(id, salt);
+    const sig = this.hash(id, salt, 8);
 
     return Buffer.from(`${id}.${sig}`).toString('base64url');
   }
@@ -112,7 +112,7 @@ export class AuthService {
     const authExpirationMs = this.configService.get('AUTH_CODE_EXP');
 
     const [id, sig] = Buffer.from(code, 'base64url').toString().split('.');
-    const checkSig = this.hash(id, salt);
+    const checkSig = this.hash(id, salt, 8);
 
     if (parseInt(id) + parseInt(authExpirationMs) < Date.now()) return false;
 
