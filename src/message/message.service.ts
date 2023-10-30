@@ -43,13 +43,13 @@ export class MessageService {
     return response;
   }
 
-  public async getChatMessages(chatId: string, cursor: number = 0) {
+  public async getChatMessages(chatId: string, cursor = 0, limit = 10) {
     return this.messageRepository.find({
       where: {
         chat: { id: chatId },
       },
       skip: cursor,
-      take: 15,
+      take: limit,
       order: {
         timestamp: 'DESC',
       },
