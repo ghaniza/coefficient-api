@@ -1,8 +1,8 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { VersioningType } from '@nestjs/common';
-import { LoggerService } from './logger/logger.service';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { AppModule } from './app.module';
+import { LoggerService } from './modules/logger/logger.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -16,7 +16,8 @@ async function bootstrap() {
     origin: configService.get('ORIGINS').split(';'),
   });
   app.useLogger(app.get(LoggerService));
+  app.useGlobalPipes(new ValidationPipe());
   await app.listen(configService.get('PORT'));
 }
 
-bootstrap();
+bootstrap().catch(console.error);

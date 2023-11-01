@@ -1,21 +1,21 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { UserModule } from './user/user.module';
-import { NotificationModule } from './notification/notification.module';
-import { LoggerModule } from './logger/logger.module';
-import { MessageModule } from './message/message.module';
-import { FileModule } from './file/file.module';
-import { AudioClipModule } from './audio-clip/audio-clip.module';
-import { ChatModule } from './chat/chat.module';
-import { ChatInteractionModule } from './chat-interaction/chat-interaction.module';
-import { AuthModule } from './auth/auth.module';
-import { LoggerMiddleware } from './logger/logger.middleware';
-import { EmailModule } from './email/email.module';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserModule } from './modules/user/user.module';
+import { NotificationModule } from './modules/notification/notification.module';
+import { LoggerModule } from './modules/logger/logger.module';
+import { MessageModule } from './modules/message/message.module';
+import { FileModule } from './modules/file/file.module';
+import { AudioClipModule } from './modules/audio-clip/audio-clip.module';
+import { ChatModule } from './modules/chat/chat.module';
+import { ChatInteractionModule } from './modules/chat-interaction/chat-interaction.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { LoggerMiddleware } from './modules/logger/logger.middleware';
+import { EmailModule } from './modules/email/email.module';
+import { BinaryModule } from './modules/binary/binary.module';
+import { SystemModule } from './modules/system/system.module';
 
 @Module({
   imports: [
@@ -46,10 +46,10 @@ import { APP_GUARD } from '@nestjs/core';
     ChatInteractionModule,
     AuthModule,
     EmailModule,
+    BinaryModule,
+    SystemModule,
   ],
-  controllers: [AppController],
   providers: [
-    AppService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
