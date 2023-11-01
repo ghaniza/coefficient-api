@@ -10,13 +10,12 @@ import {
   Post,
   Query,
   Redirect,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { CreateUserParamsDTO } from './user.dto';
-import { Request } from 'express';
 import { AuthUserGuard } from '../auth/auth.user.guard';
-import { UserId } from '../../decorators/user.decorator';
+import { RequestUser } from '../../decorators/user.decorator';
+import type { UserDTO } from '../../../types/user.dto';
 
 @Controller({ path: 'user', version: '1' })
 export class UserController {
@@ -24,19 +23,19 @@ export class UserController {
 
   @UseGuards(AuthUserGuard)
   @Get()
-  private async getViewer(@Req() request: Request) {
-    return this.userService.getUserById((request as any).user.sub);
+  private async getViewer(@RequestUser() user: UserDTO) {
+    return user;
   }
 
   @UseGuards(AuthUserGuard)
   @Get('find')
   private async findUser(
-    @UserId() userId: string,
+    @RequestUser() user: UserDTO,
     @Query('q') query: string,
     @Query('limit') limit?: number,
     @Query('cursor') cursor?: number,
   ) {
-    return this.userService.findUsers(query, userId, limit, cursor);
+    return this.userService.findUsers(query, user.id, limit, cursor);
   }
 
   @Get('reset-password')

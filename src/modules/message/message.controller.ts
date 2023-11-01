@@ -11,7 +11,8 @@ import {
 import { MessageService } from './message.service';
 import { AuthUserGuard } from '../auth/auth.user.guard';
 import { SkipThrottle } from '@nestjs/throttler';
-import { UserId } from '../../decorators/user.decorator';
+import { RequestUser } from '../../decorators/user.decorator';
+import type { UserDTO } from '../../../types/user.dto';
 
 @Controller({ path: 'message', version: '1' })
 export class MessageController {
@@ -22,9 +23,9 @@ export class MessageController {
   @Post('/by-chat/:chatId/ack')
   private async registerAck(
     @Param('chatId', ParseUUIDPipe) chatId: string,
-    @UserId() userId: string,
+    @RequestUser() user: UserDTO,
   ) {
-    return this.messageService.registerAck(chatId, userId);
+    return this.messageService.registerAck(chatId, user.id);
   }
 
   @SkipThrottle()
@@ -33,9 +34,9 @@ export class MessageController {
   private async registerMessage(
     @Param('chatId', ParseUUIDPipe) chatId: string,
     @Body('message') message: string,
-    @UserId() userId: string,
+    @RequestUser() user: UserDTO,
   ) {
-    return this.messageService.registerMessage(chatId, message, userId);
+    return this.messageService.registerMessage(chatId, message, user.id);
   }
 
   @SkipThrottle()

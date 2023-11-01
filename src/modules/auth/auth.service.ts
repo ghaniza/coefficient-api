@@ -11,6 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import { EmailService } from '../email/email.service';
 import { SystemService } from '../system/system.service';
 import { System } from '../system/system.entity';
+import { LoggerService } from '../logger/logger.service';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +23,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
     private readonly configService: ConfigService,
+    private readonly loggerService: LoggerService,
   ) {}
 
   private hash(plain: string, salt: string, length = 64) {
@@ -125,7 +127,11 @@ export class AuthService {
 
   public async sendAuthorizationCode() {
     const code = this.createAuthorizationCode();
-    await this.emailService.sendAuthorizationCode(code);
+
+    if (this.configService.get('NODE_ENV') === 'production')
+      await this.emailService.sendAuthorizationCode(code);
+
+    this.loggerService.log(`Authorization code: ${code}`, 'Authorization');
   }
 
   public generateAPIToken(system: System) {
@@ -154,5 +160,9 @@ export class AuthService {
     } catch {
       return null;
     }
+  }
+
+  public async validateUser(userId: string) {
+    return this.userService.getUserById(userId);
   }
 }

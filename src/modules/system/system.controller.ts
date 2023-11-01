@@ -3,6 +3,7 @@ import { SystemService } from './system.service';
 import { AuthSystemGuard } from '../auth/auth.system.guard';
 import { System } from './system.entity';
 import { RequestSystem } from '../../decorators/system.decorator';
+import { AuthUserGuard } from '../auth/auth.user.guard';
 
 @Controller({ path: 'system', version: '1' })
 export class SystemController {
@@ -14,6 +15,7 @@ export class SystemController {
     return system;
   }
 
+  @UseGuards(AuthUserGuard)
   @Post()
   private async createSystem(@Body('code') code: string) {
     return this.systemService.createSystem(code);

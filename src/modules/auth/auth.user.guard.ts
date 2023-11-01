@@ -6,14 +6,14 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { UserService } from '../user/user.service';
 import { Req } from '../../../types/request';
+import { AuthService } from './auth.service';
 
 @Injectable()
 export class AuthUserGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly userService: UserService,
+    private readonly authService: AuthService,
     private readonly configService: ConfigService,
   ) {}
 
@@ -29,7 +29,7 @@ export class AuthUserGuard implements CanActivate {
         audience: ['ACCESS'],
       });
 
-      const user = await this.userService.getUserById(payload.sub);
+      const user = await this.authService.validateUser(payload.sub);
 
       if (!user) return false;
 
@@ -37,6 +37,7 @@ export class AuthUserGuard implements CanActivate {
         id: user.id,
         name: user.name,
         email: user.email,
+        scopes: user.scopes,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       };

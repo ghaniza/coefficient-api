@@ -6,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { UserAuthScope } from './user.constant';
 
 @Entity()
 export class User {
@@ -33,6 +34,14 @@ export class User {
 
   @Column()
   passwordLastChangedAt: Date;
+
+  @Column({
+    type: 'varchar',
+    enum: UserAuthScope,
+    array: true,
+    default: [UserAuthScope.PROFILE],
+  })
+  scopes: UserAuthScope[];
 
   @CreateDateColumn()
   createdAt: Date;
