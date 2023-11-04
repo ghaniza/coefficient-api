@@ -8,6 +8,7 @@ import { MessageRepository } from './message.repository';
 import { ChatInteractionModule } from '../chat-interaction/chat-interaction.module';
 import { AuthModule } from '../auth/auth.module';
 import { NotificationModule } from '../notification/notification.module';
+import { AudioClipModule } from '../audio-clip/audio-clip.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { NotificationModule } from '../notification/notification.module';
     ChatInteractionModule,
     AuthModule,
     NotificationModule,
+    AudioClipModule,
   ],
   controllers: [MessageController],
   providers: [MessageGateway, MessageService, MessageRepository],

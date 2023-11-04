@@ -26,12 +26,12 @@ export class Message {
   @OneToMany(() => File, (file) => file.message)
   files: File[];
 
-  @OneToOne(() => AudioClip)
+  @OneToOne(() => AudioClip, (ac) => ac.message)
   audioClip?: AudioClip;
 
   @ManyToOne(() => Chat)
   chat: Chat;
 
-  @Column()
-  content: string;
+  @Column({ nullable: true })
+  content?: string;
 }

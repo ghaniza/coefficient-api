@@ -6,7 +6,6 @@ import {
   ParseUUIDPipe,
   Post,
   Query,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { ChatService } from './chat.service';
@@ -28,9 +27,9 @@ export class ChatController {
   @Get()
   private async getAllChatData(
     @Query('unread') unread: string,
-    @Req() request: any,
+    @RequestUser() user: UserDTO,
   ) {
-    return this.chatService.getChatData(request.user.sub, unread === 'true');
+    return this.chatService.getChatData(user.id, unread === 'true');
   }
 
   @UseGuards(AuthUserGuard)

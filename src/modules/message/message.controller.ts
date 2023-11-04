@@ -13,6 +13,7 @@ import { AuthUserGuard } from '../auth/auth.user.guard';
 import { SkipThrottle } from '@nestjs/throttler';
 import { RequestUser } from '../../decorators/user.decorator';
 import type { UserDTO } from '../../../types/user.dto';
+import { CreateAudioClipDTO } from '../audio-clip/audio-clip.dto';
 
 @Controller({ path: 'message', version: '1' })
 export class MessageController {
@@ -33,10 +34,16 @@ export class MessageController {
   @Post('/by-chat/:chatId')
   private async registerMessage(
     @Param('chatId', ParseUUIDPipe) chatId: string,
-    @Body('message') message: string,
     @RequestUser() user: UserDTO,
+    @Body('message') message?: string,
+    @Body('audioClip') audioClip?: CreateAudioClipDTO,
   ) {
-    return this.messageService.registerMessage(chatId, message, user.id);
+    return this.messageService.registerMessage(
+      chatId,
+      user.id,
+      message,
+      audioClip,
+    );
   }
 
   @SkipThrottle()

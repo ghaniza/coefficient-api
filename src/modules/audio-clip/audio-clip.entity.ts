@@ -1,4 +1,10 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Message } from '../message/message.entity';
 
 @Entity()
@@ -9,6 +15,13 @@ export class AudioClip {
   @Column()
   value: string;
 
-  @ManyToOne(() => Message)
+  @Column()
+  mimeType: string;
+
+  @Column()
+  length: number;
+
+  @JoinColumn()
+  @OneToOne(() => Message)
   message: Message;
 }
