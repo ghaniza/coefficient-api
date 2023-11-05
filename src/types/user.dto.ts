@@ -1,4 +1,4 @@
-import type { UserAuthScope } from '../src/modules/user/user.constant';
+import type { UserAuthScope } from '../modules/user/user.constant';
 
 export type UserDTO = {
   id: string;

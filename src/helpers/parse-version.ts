@@ -1,5 +1,5 @@
 import { SEMVER_REGEX } from '../modules/binary/binary.constants';
-import type { SemverDTO } from '../../types/semver';
+import type { SemverDTO } from '../types/semver';
 
 const parseVersion = (version: string): SemverDTO => {
   const semver: any = {};

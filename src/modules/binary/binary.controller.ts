@@ -3,7 +3,7 @@ import { BinaryService } from './binary.service';
 import { BinaryArch, BinaryTarget } from './binary.constants';
 import { AuthSystemGuard } from '../auth/auth.system.guard';
 import { RequestSystem } from '../../decorators/system.decorator';
-import type { SystemDTO } from '../../../types/system.dto';
+import type { SystemDTO } from '../../types/system.dto';
 import { AuthUserGuard } from '../auth/auth.user.guard';
 import { CreateVersionDTO } from './binary.dto';
 

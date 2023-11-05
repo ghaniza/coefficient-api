@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { Req } from '../../../types/request';
+import { Req } from '../../types/request';
 import { AuthService } from './auth.service';
 
 @Injectable()

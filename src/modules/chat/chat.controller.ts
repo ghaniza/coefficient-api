@@ -12,7 +12,7 @@ import { ChatService } from './chat.service';
 import { CreateChatParamsDTO } from './chat.dto';
 import { AuthUserGuard } from '../auth/auth.user.guard';
 import { RequestUser } from '../../decorators/user.decorator';
-import type { UserDTO } from '../../../types/user.dto';
+import type { UserDTO } from '../../types/user.dto';
 
 @Controller({ path: 'chat', version: '1' })
 export class ChatController {

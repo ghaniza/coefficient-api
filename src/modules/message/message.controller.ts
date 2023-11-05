@@ -12,7 +12,7 @@ import { MessageService } from './message.service';
 import { AuthUserGuard } from '../auth/auth.user.guard';
 import { SkipThrottle } from '@nestjs/throttler';
 import { RequestUser } from '../../decorators/user.decorator';
-import type { UserDTO } from '../../../types/user.dto';
+import type { UserDTO } from '../../types/user.dto';
 import { CreateAudioClipDTO } from '../audio-clip/audio-clip.dto';
 
 @Controller({ path: 'message', version: '1' })
