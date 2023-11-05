@@ -29,11 +29,12 @@ export class ChatRepository extends Repository<Chat> {
                c2.count       AS "unreadMessageCount",
                (SELECT jsonb_build_object(
                                'id', m.id, 'timestamp', m.timestamp::timestamp WITH TIME ZONE, 'content', m.content,
-                               'fromId', m."fromId"
-                           )
+                               'fromId', m."fromId", 'audioClip', ac."id", 'audioClipLength', ac."length"
+                       )
                 FROM message m
+                         LEFT JOIN "audio_clip" ac ON ac."messageId" = m.id
                 WHERE m."chatId" = "c"."id"
-                GROUP BY m."id", m."timestamp"
+                GROUP BY m."id", m."timestamp", ac."id"
                 ORDER BY m."timestamp" DESC
                 LIMIT 1)      AS "lastMessage"
         FROM chat c

@@ -72,6 +72,14 @@ export class MessageGateway
     this.server.to(roomId).emit('user-joined', {});
   }
 
+  @SubscribeMessage('change-status')
+  private async changeStatus(
+    @MessageBody('chatId') chatId: string,
+    @MessageBody() body: any,
+  ) {
+    this.server.to(`chat-${chatId}`).emit('change-status', body);
+  }
+
   public async emitMessage(chatId: string, message: Message) {
     this.server.to(`chat-${chatId}`).emit('message', message);
   }
